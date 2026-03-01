@@ -11,6 +11,13 @@ Landing page profesional desarrollada con Next.js 14 (App Router), TypeScript, T
 - ✅ Top Bar con efecto glassmorphism
 - ✅ Modo oscuro/claro con toggle funcional
 - ✅ Diseño responsive
+- ✅ Animaciones con GSAP
+- ✅ Formulario de contacto con Stepper multi-paso
+- ✅ Validaciones y restricciones de formulario
+- ✅ Sistema de notificaciones Toast
+- ✅ Carrusel horizontal de servicios con efecto glass
+- ✅ Animación de tarjetas CardSwap
+- ✅ Secciones: Hero, Services, About, Why Us, Contact
 
 ## 📦 Instalación
 

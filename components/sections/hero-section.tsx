@@ -1,289 +1,141 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { gsap } from "@/lib/gsap-utils"
-import { Button } from "@/components/ui/button"
-import { ArrowDown, Sparkles } from "lucide-react"
-import CardSwap, { Card } from "@/components/ui/card-swap"
-import Image from "next/image"
+import { useEffect, useLayoutEffect, useRef } from "react"
+import { gsap, CustomEase } from "@/lib/gsap-utils"
+import NextImage from "next/image"
+
+const customEase = CustomEase.create("heroReveal", ".87,0,.13,1")
 
 export function HeroSection() {
-  const heroRef = useRef<HTMLDivElement>(null)
-  const titleRef = useRef<HTMLHeadingElement>(null)
-  const subtitleRef = useRef<HTMLParagraphElement>(null)
-  const ctaRef = useRef<HTMLDivElement>(null)
-  const accentRef = useRef<HTMLDivElement>(null)
-  const bubblesContainerRef = useRef<HTMLDivElement>(null)
+  const heroRef = useRef<HTMLElement>(null)
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(titleRef.current, {
-        opacity: 0,
-        y: 50,
-        duration: 1.2,
-        ease: "power3.out",
-      })
+  useLayoutEffect(() => {
+    const hero = heroRef.current
+    if (!hero) return
 
-      gsap.from(subtitleRef.current, {
-        opacity: 0,
-        y: 30,
-        duration: 1.2,
-        delay: 0.3,
-        ease: "power3.out",
-      })
+    const videoContainer = hero.querySelector(".h-video-wrap")
+    const hwEls = hero.querySelectorAll(".hw")
 
-      gsap.from(ctaRef.current, {
-        opacity: 0,
-        y: 20,
-        duration: 1,
-        delay: 0.6,
-        ease: "power3.out",
-      })
-
-      gsap.from(accentRef.current, {
-        opacity: 0,
-        scale: 0.8,
-        duration: 1,
-        delay: 0.9,
-        ease: "back.out(1.7)",
-      })
-    }, heroRef)
-
-    return () => ctx.revert()
+    gsap.set(videoContainer, { scale: 1.1 })
+    gsap.set(hero.querySelector(".h-content"), { visibility: "hidden" })
+    gsap.set(hero.querySelectorAll(".h-meta-left, .h-meta-right"), { opacity: 0 })
+    gsap.set(hero.querySelector(".h-logo"), { opacity: 0 })
+    gsap.set(hero.querySelector(".h-sub"), { opacity: 0 })
+    gsap.set(hwEls, { yPercent: 100, opacity: 0 })
+    gsap.set(hero.querySelector(".h-scroll"), { opacity: 0, y: 6 })
   }, [])
 
-  // Bubble animation on mouse move
   useEffect(() => {
-    if (!heroRef.current || !bubblesContainerRef.current) return
+    const hero = heroRef.current
+    if (!hero) return
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = heroRef.current?.getBoundingClientRect()
-      if (!rect) return
+    const videoContainer = hero.querySelector(".h-video-wrap")
+    const hContent = hero.querySelector(".h-content")
+    const hwEls = hero.querySelectorAll(".hw")
+    const hMeta = hero.querySelectorAll(".h-meta-left, .h-meta-right")
+    const hLogo = hero.querySelector(".h-logo")
+    const hSub = hero.querySelector(".h-sub")
+    const hScroll = hero.querySelector(".h-scroll")
 
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-
-      // Create bubble
-      const bubble = document.createElement("div")
-      bubble.className = "absolute rounded-full pointer-events-none"
-      
-      const size = Math.random() * 40 + 20 // 20-60px
-      const opacity = Math.random() * 0.5 + 0.3 // 0.3-0.8
-      
-      bubble.style.width = `${size}px`
-      bubble.style.height = `${size}px`
-      bubble.style.left = `${x}px`
-      bubble.style.top = `${y}px`
-      bubble.style.background = "rgba(148, 163, 184, 0.2)"
-      bubble.style.border = "1px solid rgba(148, 163, 184, 0.3)"
-      bubble.style.opacity = "0"
-      bubble.style.transform = "translate(-50%, -50%) scale(0)"
-
-      bubblesContainerRef.current.appendChild(bubble)
-
-      // Animate bubble
-      gsap.to(bubble, {
-        opacity: opacity,
-        scale: 1,
-        duration: 0.3,
-        ease: "power2.out",
-      })
-
-      gsap.to(bubble, {
-        y: y - 100 - Math.random() * 50,
-        x: x + (Math.random() - 0.5) * 100,
-        opacity: 0,
-        scale: 1.5,
-        duration: 1.5 + Math.random() * 0.5,
-        ease: "power1.out",
-        onComplete: () => {
-          bubble.remove()
-        },
-      })
+    const revealHero = () => {
+      gsap.set(hContent, { visibility: "visible" })
+      gsap.to(videoContainer, { scale: 1, duration: 1.6, ease: "power3.out" })
+      gsap.to(hMeta, { opacity: 1, duration: 1, stagger: 0.125, ease: "power3.out" })
+      gsap.to(hLogo, { opacity: 1, duration: 1, stagger: 0.125, ease: "power3.out" })
+      gsap.to(hwEls, { yPercent: 0, opacity: 1, duration: 1.2, stagger: 0.08, ease: customEase, delay: 0.2 })
+      gsap.to(hSub, { opacity: 1, duration: 1, delay: 0.4, ease: "power3.out" })
+      gsap.to(hScroll, { opacity: 1, y: 0, duration: 0.8, delay: 0.6, ease: "power2.out" })
     }
 
-    const heroElement = heroRef.current
-    heroElement.addEventListener("mousemove", handleMouseMove)
+    const onLoaderComplete = () => revealHero()
 
-    return () => {
-      heroElement?.removeEventListener("mousemove", handleMouseMove)
+    const fallbackReveal = () => {
+      document.body.dataset.loaderComplete = "true"
+      window.dispatchEvent(new CustomEvent("pageloader:complete"))
+      revealHero()
     }
+
+    if (document.body.dataset.loaderComplete === "true") {
+      revealHero()
+    } else {
+      window.addEventListener("pageloader:complete", onLoaderComplete)
+      const t = setTimeout(fallbackReveal, 10000)
+      return () => {
+        window.removeEventListener("pageloader:complete", onLoaderComplete)
+        clearTimeout(t)
+      }
+    }
+    return () => window.removeEventListener("pageloader:complete", onLoaderComplete)
   }, [])
 
   return (
     <section
       id="home"
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative h-screen flex flex-col overflow-hidden bg-[hsl(200,50%,8%)]"
     >
-      {/* Bubbles Container */}
-      <div
-        ref={bubblesContainerRef}
-        className="absolute inset-0 pointer-events-none z-0"
-      />
-
-      {/* Clean White Background */}
-      <div className="absolute inset-0 bg-background z-0" />
-
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column - Text Content */}
-          <div className="text-left">
-            <div
-              ref={accentRef}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/40 border border-border/30 mb-8 backdrop-blur-sm"
-            >
-              <Sparkles className="h-3 w-3 text-primary" />
-              <span className="text-xs font-medium text-muted-foreground tracking-wide uppercase">
-                San Diego&apos;s Premier
-              </span>
-            </div>
-
-            <h1
-              ref={titleRef}
-              className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight leading-[1.1]"
-            >
-              <span className="block text-foreground">Residential</span>
-              <span className="block mt-2">
-                <span className="text-foreground">Cleaning </span>
-                <span className="text-primary">Services</span>
-              </span>
-            </h1>
-
-            <p
-              ref={subtitleRef}
-              className="text-lg md:text-xl text-muted-foreground max-w-xl mb-8 font-light leading-relaxed"
-            >
-              Exquisite attention to detail for San Diego&apos;s most discerning
-              homeowners. Where perfection meets elegance.
-            </p>
-
-            <div
-              ref={ctaRef}
-              className="flex flex-col sm:flex-row gap-3 mb-12"
-            >
-              <Button
-                size="lg"
-                className="text-base px-8 py-6 rounded-full shadow-sm hover:shadow-md transition-all duration-300 font-medium"
-                onClick={() => {
-                  document
-                    .getElementById("contact")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }}
-              >
-                Schedule Consultation
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="text-base px-8 py-6 rounded-full border hover:bg-muted/30 transition-all duration-300 font-medium"
-                onClick={() => {
-                  document
-                    .getElementById("services")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }}
-              >
-                Explore Services
-              </Button>
-            </div>
-
-            {/* Minimalist Stats */}
-            <div className="grid grid-cols-3 gap-6 max-w-md">
-              <div>
-                <div className="text-3xl md:text-4xl font-bold mb-1 text-foreground">15+</div>
-                <div className="text-xs text-muted-foreground uppercase tracking-widest font-medium">
-                  Years
-                </div>
-              </div>
-              <div className="border-l border-border/20 pl-6">
-                <div className="text-3xl md:text-4xl font-bold mb-1 text-foreground">500+</div>
-                <div className="text-xs text-muted-foreground uppercase tracking-widest font-medium">
-                  Clients
-                </div>
-              </div>
-              <div className="border-l border-border/20 pl-6">
-                <div className="text-3xl md:text-4xl font-bold mb-1 text-foreground">100%</div>
-                <div className="text-xs text-muted-foreground uppercase tracking-widest font-medium">
-                  Satisfaction
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Card Swap Animation */}
-          <div className="relative hidden lg:block h-[600px]">
-            <CardSwap
-              width={550}
-              height={500}
-              cardDistance={60}
-              verticalDistance={70}
-              delay={5000}
-              pauseOnHover={false}
-            >
-              <Card className="overflow-hidden p-0">
-                <div className="relative w-full h-[300px]">
-                  <Image
-                    src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=800&auto=format&fit=crop"
-                    alt="Premium Cleaning Service"
-                    fill
-                    className="object-cover"
-                    sizes="550px"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold mb-2">Premium Service</h3>
-                  <p className="text-muted-foreground">
-                    Professional cleaning tailored to your needs
-                  </p>
-                </div>
-              </Card>
-              <Card className="overflow-hidden p-0">
-                <div className="relative w-full h-[300px]">
-                  <Image
-                    src="https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=800&auto=format&fit=crop"
-                    alt="Eco-Friendly Products"
-                    fill
-                    className="object-cover"
-                    sizes="550px"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold mb-2">Eco-Friendly</h3>
-                  <p className="text-muted-foreground">
-                    Safe products for your family and environment
-                  </p>
-                </div>
-              </Card>
-              <Card className="overflow-hidden p-0">
-                <div className="relative w-full h-[300px]">
-                  <Image
-                    src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=800&auto=format&fit=crop"
-                    alt="Quality Guarantee"
-                    fill
-                    className="object-cover"
-                    sizes="550px"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold mb-2">Guarantee</h3>
-                  <p className="text-muted-foreground">
-                    We guarantee the quality of our service or your money back
-                  </p>
-                </div>
-              </Card>
-            </CardSwap>
-          </div>
-        </div>
+      {/* Video container */}
+      <div className="h-video-wrap absolute inset-0 z-0 overflow-hidden">
+        <video
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-auto h-auto min-w-full min-h-full object-cover opacity-90"
+          autoPlay
+          muted
+          loop
+          playsInline
+        >
+          <source src="/4205781-uhd_3840_2160_25fps.mp4" type="video/mp4" />
+        </video>
       </div>
 
-      {/* Minimalist Scroll Indicator */}
-      <div className="absolute bottom-8 left-8 z-10">
-        <div className="flex flex-col items-start gap-1.5">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
-            Scroll
+      {/* Content */}
+      <div className="h-content relative z-[2] flex flex-col h-full" style={{ visibility: "hidden" }}>
+        <header className="flex items-center justify-between px-8 md:px-12 pt-8">
+          <span className="h-meta-left text-[10px] tracking-[0.35em] uppercase text-white font-medium">
+            San Diego, CA
           </span>
-          <ArrowDown className="h-4 w-4 text-muted-foreground/60 animate-bounce" />
+          <div className="h-logo flex flex-col items-center">
+            <div className="relative w-8 h-8 md:w-10 md:h-10">
+              <NextImage
+                src="/Recurso 1.png"
+                alt="J&J Cleaning Services"
+                fill
+                className="object-contain"
+                style={{ filter: "invert(1)" }}
+                priority
+              />
+            </div>
+          </div>
+          <span className="h-meta-right text-[10px] tracking-[0.35em] uppercase text-white font-medium text-right">
+            Premium
+            <br />
+            Residential
+          </span>
+        </header>
+
+        <div className="mt-auto pb-16 md:pb-20 px-8 md:px-12">
+          <p className="h-sub text-[9px] tracking-[0.45em] uppercase text-white/80 mb-6">
+            Where perfection meets elegance
+          </p>
+          <h1
+            className="font-medium text-white leading-[0.9] tracking-[-0.04em] overflow-hidden"
+            style={{ fontSize: "clamp(2.3rem, 0.5rem + 4.6vw, 5.2rem)" }}
+          >
+            <div className="overflow-hidden pb-[0.15em]">
+              <div className="hw">Exquisite Residential</div>
+            </div>
+            <div className="overflow-hidden pb-[0.15em] -mt-[0.12em]">
+              <div className="hw">Cleaning in San Diego</div>
+            </div>
+            <div className="overflow-hidden pb-[0.15em] -mt-[0.12em]">
+              <div className="hw font-normal italic" style={{ fontFamily: "var(--font-playfair)" }}>
+                for the finest homes
+              </div>
+            </div>
+          </h1>
+          <div className="h-scroll flex items-center gap-3 mt-10">
+            <div className="w-6 h-[1px] bg-white/40" />
+            <span className="text-[9px] tracking-[0.4em] uppercase text-white/80">Scroll</span>
+          </div>
         </div>
       </div>
     </section>

@@ -5,47 +5,47 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 200 25% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 200 25% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 217 91% 60%;
+    --popover-foreground: 200 25% 12%;
+    --primary: 200 85% 45%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 217 91% 95%;
-    --accent-foreground: 217 91% 40%;
+    --secondary: 200 15% 95%;
+    --secondary-foreground: 200 25% 20%;
+    --muted: 200 12% 95%;
+    --muted-foreground: 200 10% 45%;
+    --accent: 200 25% 92%;
+    --accent-foreground: 200 30% 25%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 217 91% 60%;
+    --border: 200 20% 90%;
+    --input: 200 20% 90%;
+    --ring: 200 85% 45%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 0 0% 0%;
+    --background: 200 35% 8%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 3%;
+    --card: 200 35% 12%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3%;
+    --popover: 200 35% 12%;
     --popover-foreground: 0 0% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 8%;
+    --primary: 200 75% 55%;
+    --primary-foreground: 200 35% 12%;
+    --secondary: 200 25% 15%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 8%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 217 91% 15%;
-    --accent-foreground: 217 91% 70%;
+    --muted: 200 25% 15%;
+    --muted-foreground: 200 20% 65%;
+    --accent: 200 50% 25%;
+    --accent-foreground: 200 75% 72%;
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 217 91% 60%;
+    --border: 200 20% 22%;
+    --input: 200 20% 22%;
+    --ring: 200 75% 55%;
   }
 }
 
@@ -55,8 +55,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-optical-sizing: auto;
+    font-style: normal;
   }
+
 }
+
+
 
 @layer utilities {
   .scrollbar-hide {
@@ -68,3 +73,94 @@
   }
 }
 
+/* Área de scroll del modal: scrollbar discreta */
+.inquiry-modal-scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+}
+.inquiry-modal-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.inquiry-modal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.inquiry-modal-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+.inquiry-modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Header del modal: área de arrastre (como viewtransition) */
+.modal-header-container {
+  cursor: grab;
+  user-select: none;
+}
+.modal-header-container:active {
+  cursor: grabbing;
+}
+.modal-header-container button {
+  cursor: pointer;
+}
+
+.inquiry-modal-panel .stepper-outer-container {
+  min-height: 0;
+}
+.inquiry-modal-panel .stepper-circle-container {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+.inquiry-modal-panel .inquiry-modal-stepper .stepper-indicator-row {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+.inquiry-modal-panel .stepper-next-button {
+  background-color: hsl(200, 75%, 68%);
+  color: hsl(200, 32%, 11%);
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.inquiry-modal-panel .stepper-next-button:hover {
+  background-color: hsl(200, 75%, 72%);
+  box-shadow: 0 4px 14px rgba(100, 180, 220, 0.25);
+}
+.inquiry-modal-panel .stepper-next-button:active {
+  transform: scale(0.98);
+}
+.inquiry-modal-panel .stepper-back-button {
+  color: hsl(200, 75%, 72%);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+.inquiry-modal-panel .stepper-back-button:hover {
+  color: hsl(200, 85%, 82%);
+  background: rgba(255, 255, 255, 0.06);
+}
+.inquiry-modal-panel .stepper-step-number,
+.inquiry-modal-panel .stepper-active-dot,
+.inquiry-modal-panel .stepper-check-icon {
+  color: hsl(200, 75%, 68%);
+}
+.inquiry-modal-panel .stepper-active-dot {
+  background-color: hsl(200, 75%, 68%);
+}
+.inquiry-modal-panel .stepper-connector {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+.inquiry-modal-panel .stepper-connector-inner {
+  background-color: hsl(200, 75%, 68%);
+}
+.inquiry-modal-panel .stepper-footer-container {
+  padding-bottom: 1.5rem;
+}
+.inquiry-modal-panel .stepper-footer-nav {
+  margin-top: 2rem;
+}

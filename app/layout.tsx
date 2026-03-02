@@ -1,14 +1,25 @@
 import type { Metadata } from "next"
-import { Outfit } from "next/font/google"
+import { Figtree, Playfair_Display } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
+import { SmoothScroll } from "@/components/smooth-scroll"
+import { PageLoader } from "@/components/page-loader"
 
-const outfit = Outfit({ subsets: ["latin"] })
+const figtree = Figtree({
+  subsets: ["latin"],
+  variable: "--font-figtree",
+  style: ["normal", "italic"],
+})
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-playfair",
+})
 
 export const metadata: Metadata = {
-  title: "J & J Cleaning Services - Servicios de Limpieza Profesional",
-  description: "Servicios de limpieza profesional de alta calidad",
+  title: "J & J Cleaning Services - Premium Cleaning Service",
+  description: "Exquisite cleaning services for discerning homeowners.",
   icons: {
     icon: "/logo.svg",
   },
@@ -20,19 +31,22 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" suppressHydrationWarning>
-      <body className={outfit.className}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${figtree.variable} ${playfair.variable} ${figtree.className}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster />
+          <PageLoader>
+            <SmoothScroll>
+              {children}
+              <Toaster />
+            </SmoothScroll>
+          </PageLoader>
         </ThemeProvider>
       </body>
     </html>
   )
 }
-
